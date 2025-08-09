@@ -1,15 +1,18 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "declaration": false,
-    "removeComments": true,
+    "target": "es2017",
+    "outDir": "dist",
+    "rootDir": "src",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2017",
     "sourceMap": true,
-    "outDir": "dist",
-    "baseUrl": "."
+    "strict": false,
+    "skipLibCheck": true,
+    "removeComments": true
   },
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
