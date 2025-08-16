@@ -29,80 +29,95 @@ export default function AdminClient() {
     setLoading(false);
   }
 
-  async function addSample() {
-    await fetch(`${API}/___add?title=${encodeURIComponent('Boxy Tee — Jet Black')}&priceCents=3800&sku=TEE-BLK-001`);
+  async function createProduct(e: React.FormEvent) {
+    e.preventDefault();
+    const body = { title, priceCents: Number(priceCents || 0), sku: sku || undefined, status: 'ACTIVE', inventory: 10 };
+    await fetch(`${API}/products`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    setTitle(''); setPriceCents(''); setSku('');
     await load();
   }
 
-  async function createProduct(e: React.FormEvent) {
-    e.preventDefault();
-    const body = {
-      title,
-      priceCents: Number(priceCents || 0),
-      sku: sku || undefined,
-      status: 'ACTIVE',
-      inventory: 10,
-    };
-    await fetch(`${API}/products`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    setTitle('');
-    setPriceCents('');
-    setSku('');
+  async function remove(id: string) {
+    await fetch(`${API}/products/${id}`, { method: 'DELETE' });
     await load();
   }
 
   useEffect(() => { load(); }, []);
 
   return (
-    <main style={{ padding: 24, maxWidth: 720, margin: '0 auto' }}>
-      <h1>Raspberry Admin</h1>
-      <p style={{ marginTop: 8, color: '#666' }}>API: {API}</p>
-
-      <section style={{ marginTop: 24, padding: 16, border: '1px solid #eee', borderRadius: 12 }}>
-        <h2 style={{ marginTop: 0 }}>Create product</h2>
-        <form onSubmit={createProduct} style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 160px 160px auto' }}>
-          <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
-          <input placeholder="Price (cents)" value={priceCents} onChange={e => setPriceCents(e.target.value)} />
-          <input placeholder="SKU (optional)" value={sku} onChange={e => setSku(e.target.value)} />
-          <button type="submit">Add</button>
+    <div className="space-y-6">
+      {/* Create form card */}
+      <section className="bg-[var(--panel)] border border-white/5 rounded-2xl p-5">
+        <h2 className="text-lg font-semibold mb-4">Create product</h2>
+        <form onSubmit={createProduct} className="grid gap-3 sm:grid-cols-[1fr_160px_160px_auto]">
+          <input
+            className="bg-black/20 border border-white/10 rounded-lg px-3 py-2"
+            placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
+          <input
+            className="bg-black/20 border border-white/10 rounded-lg px-3 py-2"
+            placeholder="Price (cents)" value={priceCents} onChange={e => setPriceCents(e.target.value)} />
+          <input
+            className="bg-black/20 border border-white/10 rounded-lg px-3 py-2"
+            placeholder="SKU (optional)" value={sku} onChange={e => setSku(e.target.value)} />
+          <button
+            className="bg-[var(--accent)] text-black font-semibold rounded-lg px-4 py-2 hover:opacity-90 active:opacity-80"
+            type="submit">
+            Add
+          </button>
         </form>
-        <button onClick={addSample} style={{ marginTop: 8 }}>Add sample product</button>
       </section>
 
-      <section style={{ marginTop: 24 }}>
-        <h2 style={{ marginTop: 0 }}>Products</h2>
+      {/* Products table card */}
+      <section className="bg-[var(--panel)] border border-white/5 rounded-2xl">
+        <div className="p-5 border-b border-white/5 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Products</h2>
+          {!loading && <div className="text-xs text-[var(--muted)]">{products.length} item(s)</div>}
+        </div>
+
         {loading ? (
-          <div>Loading…</div>
+          <div className="p-5 text-[var(--muted)]">Loading…</div>
         ) : products.length === 0 ? (
-          <div>No products yet.</div>
+          <div className="p-5 text-[var(--muted)]">No products yet.</div>
         ) : (
-          <table cellPadding={8} style={{ borderCollapse: 'collapse', width: '100%' }}>
-            <thead>
-              <tr>
-                <th align="left">Title</th>
-                <th align="left">SKU</th>
-                <th align="right">Price</th>
-                <th align="right">Inventory</th>
-                <th align="left">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map(p => (
-                <tr key={p.id} style={{ borderTop: '1px solid #eee' }}>
-                  <td>{p.title}</td>
-                  <td>{p.sku || '—'}</td>
-                  <td align="right">${(p.priceCents / 100).toFixed(2)}</td>
-                  <td align="right">{p.inventory}</td>
-                  <td>{p.status}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-[var(--muted)]">
+                <tr className="[&>th]:px-5 [&>th]:py-3">
+                  <th>Title</th>
+                  <th>SKU</th>
+                  <th className="text-right">Price</th>
+                  <th className="text-right">Inventory</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="[&>tr]:border-t [&>tr]:border-white/5">
+                {products.map((p) => (
+                  <tr key={p.id} className="[&>td]:px-5 [&>td]:py-3">
+                    <td className="font-medium">{p.title}</td>
+                    <td className="text-[var(--muted)]">{p.sku || '—'}</td>
+                    <td className="text-right">${(p.priceCents / 100).toFixed(2)}</td>
+                    <td className="text-right">{p.inventory}</td>
+                    <td>
+                      <span className="inline-flex items-center gap-2">
+                        <span className={`inline-block h-2 w-2 rounded-full ${p.status === 'ACTIVE' ? 'bg-green-400' : 'bg-yellow-400'}`} />
+                        {p.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => remove(p.id)}
+                        className="text-red-300 hover:text-red-200 underline underline-offset-4">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }
