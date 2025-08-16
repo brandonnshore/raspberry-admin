@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0b0c10;
+  --panel: #111318;
+  --muted: #8b95a1;
+  --text: #e6e9ee;
+  --accent: #6ee7b7; /* mint */
+  --accent-2: #60a5fa; /* blue */
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); }
+a { color: var(--accent-2); }
+button { outline: none; }
